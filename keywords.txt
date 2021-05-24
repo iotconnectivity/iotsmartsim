@@ -1,0 +1,41 @@
+#######################################
+# Syntax Coloring Map For GSM
+####################################### 
+# Class
+#######################################
+
+Safe2	KEYWORD1
+
+#######################################
+# Methods and Functions 
+#######################################	
+
+init	KEYWORD2
+waitForModemStart	KEYWORD2
+waitForNetworkRegistration	KEYWORD2
+state	KEYWORD2
+deviceIdSet	KEYWORD2
+dataSend	KEYWORD2
+configRequest	KEYWORD2
+configGet	KEYWORD2
+
+# extended API
+atCsimBuild	KEYWORD2
+atCommandSend	KEYWORD2
+atCommandResponse	KEYWORD2
+prepareForSleep	KEYWORD2
+
+#######################################
+# Constants
+#######################################
+
+RES_OK	LITERAL1
+RES_INVALID_CSIM_RESPONSE	LITERAL1
+RES_INVALID_OPEN_CHANNEL_RESPONSE	LITERAL1
+RES_INVALID_CHANNEL_ID	LITERAL1
+RES_INVALID_SELECT_RESPONSE	LITERAL1
+RES_UNEXPECTED_GET_STATUS_RESPONSE	LITERAL1
+RES_INVALID_GET_STATUS_RESPONSE	LITERAL1
+RES_UNEXPECTED_GET_DATA_RESPONSE	LITERAL1
+RES_INVALID_GET_DATA_RESPONSE	LITERAL1
+
