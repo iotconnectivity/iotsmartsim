@@ -35,10 +35,10 @@
 
 class Safe2 {
   public:
-    Safe2(HardwareSerial * modemSerial, Serial_ * logSerial);
+    Safe2(HardwareSerial * modemSerial);
     
     // standard API
-    byte init(int modemBaudRate, int logBaudRate);
+    byte init(long modemBaudRate);
     
     void waitForModemStart();
     void waitForNetworkRegistration();
@@ -60,16 +60,13 @@ class Safe2 {
     
   private:
     HardwareSerial * _modem;
-    Serial_ * _logger;
 
     byte _bufferAT[LEN_IO_BUFFER];
     byte _apduHeader[LEN_APDU_HEADER];
 
-    boolean _log;
     byte _channelNo;
 
     bool registered(char * resp);
-    void logData(byte * buf, short len);
     short decimalPut(int v, short offset);
     short bytePutHex(byte b, short offset);
     char hex2val(char h);

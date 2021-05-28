@@ -60,34 +60,21 @@ const char MODEM_ERROR[LEN_MODEM_ERROR] = {'E', 'R', 'R', 'O', 'R', '\r', '\0'};
 #define EOL  '\n'
 
 
-Safe2::Safe2(HardwareSerial * modemSerial, Serial_ * logSerial) {
+Safe2::Safe2(HardwareSerial * modemSerial) {
   _modem = modemSerial;
-  _logger = logSerial;
-  _log = (logSerial != NULL);
 }
 
-byte Safe2::init(int modemBaudRate, int logBaudRate) {
+byte Safe2::init(long modemBaudRate) {
 
-  if ((_modem == NULL) || (modemBaudRate < 1200)) {
+  if (modemBaudRate < 1200) {
     return RES_INVALID_PARAMETERS;
   }
-  // reset the ublox module
-  pinMode(GSM_RESETN, OUTPUT);
-  digitalWrite(GSM_RESETN, HIGH);
-  delay(100);
-  digitalWrite(GSM_RESETN, LOW);
-  delay(300);
 
-  if ((_log) && (logBaudRate > 0)) {
-    _logger->begin(logBaudRate);
-    while (!*_logger) {
-      ; // wait for serial port to connect
-    }
-  }
   // initialize modem AT interface
   _modem->begin(modemBaudRate);
-  if (_log) {
-    _logger->println("SAFE2 init");
+//  delay(1000);
+  while (!(*_modem)) {
+    ; // wait for serial port to connect
   }
   return RES_OK;
 }
@@ -98,33 +85,25 @@ byte Safe2::init(int modemBaudRate, int logBaudRate) {
 #define TIME_WAIT_FOR_SERIAL_AVAILABLE_MS  300
 
 void Safe2::waitForModemStart() {
-  byte b;
+  char b;
   while (true) {
     // put AT command
-    logData((byte *)MODEM_AT, LEN_MODEM_AT);
     _modem->write(MODEM_AT, LEN_MODEM_AT);
     delay(TIME_WAIT_FOR_CHECK_AT_RESPONSE_MS);
     // modem could not respond during initialization
     if (_modem->available()) {
       while (_modem->available()) {
         b = _modem->read();
-        if (_log) {
-          _logger->write(b);
-        }
         delay(TIME_WAIT_FOR_NEXT_CHAR_MS);
       }
       break;
     }
     delay(TIME_WAIT_FOR_SERIAL_AVAILABLE_MS);
   };
-  logData((byte *)MODEM_AT_ECHO_OFF, LEN_MODEM_AT_ECHO_OFF);
   _modem->write(MODEM_AT_ECHO_OFF, LEN_MODEM_AT_ECHO_OFF);
   delay(TIME_WAIT_FOR_CHECK_AT_RESPONSE_MS);
   while (_modem->available()) {
     b = _modem->read();
-    if (_log) {
-      _logger->write(b);
-    }
     delay(TIME_WAIT_FOR_NEXT_CHAR_MS);
   }
 }
@@ -135,9 +114,7 @@ void Safe2::waitForNetworkRegistration() {
   while (cntr < TECHNOLOGY_INIT_WAITING) {
     // wait for a half of a second  
     delay(500);                       
-
     // put AT command
-    logData((byte *)MODEM_AT_CREG, LEN_MODEM_AT_CREG);
     memcpy(_bufferAT, MODEM_AT_CREG, LEN_MODEM_AT_CREG);
     atCommandSend(LEN_MODEM_AT_CREG);
     // read AT response
@@ -148,23 +125,10 @@ void Safe2::waitForNetworkRegistration() {
     ptr = strstr((char *)_bufferAT, MODEM_CREG);
     if (ptr != NULL) {
       registeredFlag = registered(&ptr[LEN_MODEM_CREG + 1]);
-      if (_log) {
-        _logger->write(ptr[LEN_MODEM_CREG - 1]);
-        _logger->write(':');
-        _logger->write(ptr[LEN_MODEM_CREG + 1]);
-        _logger->println();
-      }
     } else {
-      if (_log) {
-        Serial.println("not found `+CREG`");
-      }
     }
     if (registeredFlag) {
       cntr++;
-      if (_log) {
-        _logger->print("Registered timeout counter: ");
-        _logger->println(cntr);
-      }
     }
     // wait 1 sec before repeat
     delay(1000);
@@ -189,29 +153,6 @@ bool Safe2::registered(char * resp) {
       return false;
   }
 }
-
-void Safe2::logData(byte * dataBuf, short dataLen) {
-  int blockLen;
-  int len = dataLen;
-  int ofs = 0;
-  if (_log) {
-    while (len > 0) {
-      blockLen = _logger->availableForWrite();
-      if (blockLen < 1) {
-        delay(1);
-        continue;
-      }
-      if (blockLen > len) {
-        blockLen = len;
-      }
-      _logger->write(&dataBuf[ofs], blockLen);
-      ofs += blockLen;
-      len -= blockLen;
-    }
-    _logger->flush();
-  }
-}
-
 
 void Safe2::atCommandSend(short len) {
   short cmdLen = len;
@@ -350,17 +291,12 @@ byte Safe2::channelOpen() {
   }
   // put AT SIM command: Open Supplementary Logical Channel
   short cmdLen = atCsimBuild((byte *)APDU_MANAGE_CHANNEL, NULL, 1);
-  logData(_bufferAT, cmdLen);
   atCommandSend(cmdLen);
   short respLen = atCommandResponse();
-  logData(_bufferAT, respLen);
   // analyze response
   char * ptr;
   ptr = strstr((char *)_bufferAT, MODEM_CSIM);
   if (ptr == NULL) {
-    if (_log) {
-      _logger->println("CSIM not detected in the response");
-    }
     return RES_INVALID_CSIM_RESPONSE;
   }
 
@@ -369,35 +305,23 @@ byte Safe2::channelOpen() {
       (ptr[LEN_MODEM_CSIM + 1] != '"') ||
       (ptr[LEN_MODEM_CSIM + 2] != '0')) {
 
-    if (_log) {
-      _logger->println("Unexpected response for MANAGE CHANNEL");
-    }
     return RES_INVALID_OPEN_CHANNEL_RESPONSE;
   }
 
   // extract channel ID
   char ch = ptr[LEN_MODEM_CSIM + 3] - '0';
   if ((ch <= 0) || (ch >= 4)) {
-    if (_log) {
-      _logger->print("Unexpected response (chan ID) for MANAGE CHANNEL: ");
-      _logger->println(ch);
-    }
     return RES_INVALID_CHANNEL_ID;
   }
   _channelNo = ch;
 
   // SELECT (by AID) SAFE2
   cmdLen = atCsimBuild((byte *)APDU_SELECT, (byte *)AID_SAFE2, LEN_AID_SAFE2);
-  logData(_bufferAT, cmdLen);
   atCommandSend(cmdLen);
   respLen = atCommandResponse();
-  logData(_bufferAT, respLen);
 
   ptr = strstr((char *)_bufferAT, MODEM_CSIM);
   if (ptr == NULL) {
-    if (_log) {
-      _logger->println("CSIM not detected in the response");
-    }
     return RES_INVALID_CSIM_RESPONSE;
   }
 
@@ -409,9 +333,6 @@ byte Safe2::channelOpen() {
       (ptr[LEN_MODEM_CSIM + 4] != '0') ||
       (ptr[LEN_MODEM_CSIM + 5] != '0')) {
 
-    if (_log) {
-      _logger->println("Unexpected response for SELECT(SAFE2)");
-    }
     return RES_INVALID_SELECT_RESPONSE;
   }
   return RES_OK;
@@ -426,10 +347,8 @@ byte Safe2::channelClose() {
   _apduHeader[OFS_APDU_P1] = MODE_CHANNEL_CLOSE;
   _apduHeader[OFS_APDU_P2] = _channelNo;
   short cmdLen = atCsimBuild(_apduHeader, NULL, 0);
-  logData(_bufferAT, cmdLen);
   atCommandSend(cmdLen);
   short respLen = atCommandResponse();
-  logData(_bufferAT, respLen);
   _channelNo = 0;
   return RES_OK;
 }
@@ -447,10 +366,6 @@ byte Safe2::dataGet(byte mode, short &dataLength) {
   if (_channelNo == 0) {
     res = channelOpen();
     if (res != RES_OK) {
-      if (_log) {
-        _logger->print("Error in channelOpen(): ");
-        _logger->println(res);
-      }
       return res;
     }
   }
@@ -461,19 +376,14 @@ byte Safe2::dataGet(byte mode, short &dataLength) {
   _apduHeader[OFS_APDU_P2] = 0x00;
   _apduHeader[OFS_APDU_LEN] = 0x00;
   cmdLen = atCsimBuild(_apduHeader, NULL, 0);
-  logData(_bufferAT, cmdLen);
   atCommandSend(cmdLen);
   respLen = atCommandResponse();
 
   if (mode == APDU_GET_DATA_MODE_DATA) {
-    logData(_bufferAT, respLen);
     // analyze response
     char * ptr;
     ptr = strstr((char *)_bufferAT, MODEM_CSIM);
     if (ptr == NULL) {
-      if (_log) {
-        _logger->println("CSIM not detected in the response");
-      }
       return RES_INVALID_CSIM_RESPONSE;
     }
   
@@ -487,9 +397,6 @@ byte Safe2::dataGet(byte mode, short &dataLength) {
       bh = hex2val(ptr[LEN_MODEM_CSIM + 4]);
       bl = hex2val(ptr[LEN_MODEM_CSIM + 5]);
       if ((bh == -1) || (bl == -1)) {
-        if (_log) {
-          _logger->println("Invalid response for GET DATA (Data)");
-        }
         return RES_INVALID_GET_DATA_RESPONSE;
       }
       byte len = (unsigned char)((bh << 4) | bl);
@@ -500,16 +407,11 @@ byte Safe2::dataGet(byte mode, short &dataLength) {
       _apduHeader[OFS_APDU_P2] = 0x00;
       _apduHeader[OFS_APDU_LEN] = len;
       cmdLen = atCsimBuild(_apduHeader, NULL, len);
-      logData(_bufferAT, cmdLen);
       atCommandSend(cmdLen);
       respLen = atCommandResponse();
-      logData(_bufferAT, respLen);
     
       ptr = strstr((char *)_bufferAT, MODEM_CSIM);
       if (ptr == NULL) {
-        if (_log) {
-          _logger->println("CSIM not detected in the response (GR)");
-        }
         return RES_INVALID_CSIM_RESPONSE;
       }
     }    
@@ -519,9 +421,6 @@ byte Safe2::dataGet(byte mode, short &dataLength) {
     do {
       b = ptr[ofs++] - 0x30;
       if ((b < 0) || (b > 9)) {
-        if (_log) {
-          _logger->println("CSIM not detected in the response (GR)");
-        }
         return RES_INVALID_CSIM_RESPONSE;
       }
       hlen *= 10; // shift left for 1 tetrade
@@ -531,9 +430,6 @@ byte Safe2::dataGet(byte mode, short &dataLength) {
     ofs += 2;
     hlen >>= 1; // number of bytes
     if (hlen <= 0) {
-      if (_log) {
-        _logger->println("Invalid length in GET DATA response");
-      }
       return RES_INVALID_GET_DATA_RESPONSE;
     }
     hlen -= 2; // exclude SW
@@ -541,9 +437,6 @@ byte Safe2::dataGet(byte mode, short &dataLength) {
       bh = hex2val(ptr[ofs]);
       bl = hex2val(ptr[ofs + 1]);
       if ((bh == -1) || (bl == -1)) {
-        if (_log) {
-          _logger->print("Invalid charcters in the response (GR): ");
-        }
         return RES_INVALID_CSIM_RESPONSE;
       }
       ofs += 2;
@@ -552,10 +445,6 @@ byte Safe2::dataGet(byte mode, short &dataLength) {
     _bufferAT[hlen] = 0;
     // re-assign response length
     respLen = hlen;
-  }
-  logData(_bufferAT, respLen);
-  if (_log) {
-    _logger->println();
   }
   dataLength = respLen;
   return RES_OK;
@@ -610,18 +499,13 @@ byte Safe2::state(short &receivingState, short &receivingResult) {
   _apduHeader[OFS_APDU_P2] = 0x00;
   _apduHeader[OFS_APDU_LEN] = 0x00;
   short cmdLen = atCsimBuild(_apduHeader, NULL, 0);
-  logData(_bufferAT, cmdLen);
   atCommandSend(cmdLen);
   short respLen = atCommandResponse();
-  logData(_bufferAT, respLen);
 
   // analyze response
   char * ptr;
   ptr = strstr((char *)_bufferAT, MODEM_CSIM);
   if (ptr == NULL) {
-    if (_log) {
-      _logger->println("CSIM not detected in the response (GS)");
-    }
     return RES_INVALID_CSIM_RESPONSE;
   }
 
@@ -640,16 +524,11 @@ byte Safe2::state(short &receivingState, short &receivingResult) {
     _apduHeader[OFS_APDU_P2] = 0x00;
     _apduHeader[OFS_APDU_LEN] = APDU_GET_STATUS_LEN_GET;
     cmdLen = atCsimBuild(_apduHeader, NULL, APDU_GET_STATUS_LEN_GET);
-    logData(_bufferAT, cmdLen);
     atCommandSend(cmdLen);
     respLen = atCommandResponse();
-    logData(_bufferAT, respLen);
   
     ptr = strstr((char *)_bufferAT, MODEM_CSIM);
     if (ptr == NULL) {
-      if (_log) {
-        _logger->println("CSIM not detected in the response (GR)");
-      }
       return RES_INVALID_CSIM_RESPONSE;
     }
   }
@@ -659,25 +538,16 @@ byte Safe2::state(short &receivingState, short &receivingResult) {
       (ptr[LEN_MODEM_CSIM + 0] != '2') || 
       (ptr[LEN_MODEM_CSIM + 1] != ',') ||
       (ptr[LEN_MODEM_CSIM + 2] != '"')) {
-    if (_log) {
-      _logger->println("Unexpected response for GET STATUS (Receive)");
-    }
     return RES_UNEXPECTED_GET_STATUS_RESPONSE;
   }
 
   // extract state
   short wState = chars2short(&ptr[LEN_MODEM_CSIM + 3]);
   if (wState < 0) {
-    if (_log) {
-      _logger->println("Invalid response for GET STATUS (Receive)");
-    }
     return RES_INVALID_GET_STATUS_RESPONSE;
   }
   short wResult = chars2short(&ptr[LEN_MODEM_CSIM + 3 + 4]);
   if (wResult < 0) {
-    if (_log) {
-      Serial.println("Invalid response for GET STATUS (Receive)");
-    }
     return RES_INVALID_GET_STATUS_RESPONSE;
   }
   receivingState = wState;
@@ -693,10 +563,6 @@ byte Safe2::dataPut(byte tag, byte * dataPtr, short dataLen) {
   if (_channelNo == 0) {
     res = channelOpen();
     if (res != RES_OK) {
-      if (_log) {
-        _logger->print("Error in channelOpen(): ");
-        _logger->println(res);
-      }
       return res;
     }
   }
@@ -708,10 +574,8 @@ byte Safe2::dataPut(byte tag, byte * dataPtr, short dataLen) {
   _apduHeader[OFS_APDU_P2] = tag;
   _apduHeader[OFS_APDU_LEN] = 0x00;
   cmdLen = atCsimBuild(_apduHeader, dataPtr, dataLen);
-  logData(_bufferAT, cmdLen);
   atCommandSend(cmdLen);
   respLen = atCommandResponse();
-  logData(_bufferAT, respLen);
   return RES_OK;
 }
 

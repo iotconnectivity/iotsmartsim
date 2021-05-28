@@ -1,12 +1,13 @@
-#include <MKRGSM.h>
-#include <ArduinoUniqueID.h>
 #include <ArduinoJson.h>
 #include "safe2.h"
 
-// LED (Config)
-#define PIN_LED  7
+// Waveshare Sim7000E NB-IoT HAT
+#define PIN_DTR  4
 
-Safe2 safe2(&SerialGSM, NULL);
+// LED (Config)
+#define PIN_LED  6
+
+Safe2 safe2(&Serial1);
 
 #define STATE_READY  0x00
 #define STATE_REQUEST_SENT  0x01
@@ -15,11 +16,11 @@ Safe2 safe2(&SerialGSM, NULL);
 
 #define RES_JSON_DESERIALIZATION_FAILED  0x81
 
-#define MODEM_BAUD_RATE  9600
-#define LOG_BAUD_RATE  115200
+#define MODEM_BAUD_RATE  57600
+#define LOG_BAUD_RATE  57600
 
-#define LEN_DEVICE_ID_MAX  16
-unsigned char id[LEN_DEVICE_ID_MAX];
+#define LEN_DEVICE_ID  10
+byte id[LEN_DEVICE_ID];
 
 char gState;
 
@@ -66,30 +67,42 @@ char configParseApply(const char * buf, short dataLen) {
 
 void setup() {
   byte res;
+  
+  Serial.begin(LOG_BAUD_RATE); 
+  while (!Serial) {
+    ; // wait for serial port to connect
+  }
 
-  // configure pins
+  // get Device ID
+  memcpy(id, (void *)&SIGROW.SERNUM0, LEN_DEVICE_ID);
+
+  // configure pins (DTR - mandatory)
+  pinMode(PIN_DTR, OUTPUT);
   pinMode(PIN_LED, OUTPUT);
-  Serial.begin(LOG_BAUD_RATE);
+  
+  Serial.print("Modem initialization...");
+  res = safe2.init(MODEM_BAUD_RATE);
+  if (res == RES_OK) {
+    Serial.println("OK");
+  } else {
+    Serial.print("ERROR: ");
+    Serial.println(res);
+  }
 
-  safe2.init(MODEM_BAUD_RATE, 0);
+  // wake up Sim7000
+  digitalWrite(PIN_DTR, LOW);   
+  delay(1000);
 
-  Serial.println("waiting for modem start...");
+  Serial.print("waiting for modem start...");
   safe2.waitForModemStart();
   Serial.println("OK");
 
-  Serial.println("waiting for network registration...");
+  Serial.print("waiting for network registration...");
   safe2.waitForNetworkRegistration();
   Serial.println("OK");
-  Serial.println("setup finished");
-
   
   // put Device ID
-  short idLen = UniqueIDsize;
-  if (idLen > LEN_DEVICE_ID_MAX) {
-    idLen = LEN_DEVICE_ID_MAX;
-  }
-  memcpy(id, (void *)UniqueID, idLen);
-  res = safe2.deviceIdSet(id, idLen);
+  res = safe2.deviceIdSet(id, LEN_DEVICE_ID);
   if (res == RES_OK) {
     Serial.println("Set Device ID: OK");
   } else {
