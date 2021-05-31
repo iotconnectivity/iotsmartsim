@@ -17,7 +17,7 @@
     - Arduino Project Hub Article: https://create.arduino.cc/projecthub/kostiantynchertov/zero-touch-provisioning-based-on-tls-1-3-a07359
 
   Usage:
-    - Open Board Manager and install "Arduino SAMD Boards (32-bits ARM Cortex-M0+).
+    - Open Board Manager and install "Arduino SAMD Boards (32-bits ARM Cortex-M0+)".
     - Open Library Manager and install: "MKRGSM", "ArduinoUniqueID".
     - Select Board "Arduino MKR 1400 GSM".
     - Optionally configure the JSON payload (See below).
@@ -25,7 +25,6 @@
   Requirements:
     - Arduino MKR 1400 GSM board.
     - Pod ENO SIM Card (ask for yours, emails below).
-    - Configuration for the SIM Card with the following format (at Pod IoT Platform):
 
   Authors:
    - Kostiantyn Chertov <kostiantyn.chertov@podgroup.com>
