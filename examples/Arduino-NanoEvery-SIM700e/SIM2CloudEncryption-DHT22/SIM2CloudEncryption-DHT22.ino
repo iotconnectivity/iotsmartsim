@@ -1,11 +1,49 @@
-#include "dht.h"
-#include "podenosim.h"
+/*
+  Arduino Nano Every + Waveshare Sim7000E NB-IoT Hat + DHT22 SIM2Cloud-Encryption Demo.
+  Copyright (c) 2021 Pod Group Ltd. http://podgroup.com
+  
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the MIT License.
+  
+  You should have received a copy of the MIT License
+  along with this program.  If not, see <https://opensource.org/licenses/MIT>.
+
+  Description:
+    - Post DHT22 Temperature to Pod IoT Platform API (See below).
+    - Uses Pod ENO SIM built-in TLS1.3-PSK to request HTTPS POST /v1/data/{DEVICEID}
+
+  More information:
+    - Pod IoT Platform: https://iotsim.podgroup.com/v1/docs/#/
+    - Arduino Project Hub Article: https://create.arduino.cc/projecthub/kostiantynchertov/zero-touch-provisioning-based-on-tls-1-3-a07359
+
+  Usage:
+    - Open Board Manager and install "Arduino megaAVR Boards".
+    - Open Library Manager and install: "DHT Sensor Library".
+    - Select Board "Arduino Nano Every".
+
+  Requirements:
+    - Arduino Nano Every.
+    - Waveshare Sim7000E NB-IoT Hat
+    - AM2302 DHT22 Temperature Sensor.
+    - Pod ENO SIM Card (ask for yours, emails below).
+
+  Authors:
+   - Kostiantyn Chertov <kostiantyn.chertov@podgroup.com>
+   - J. Félix Ontañón <felix.ontanon@podgroup.com>
+*/
+
+// --------- BEGINING OF CONFIGURABLE FIRMWARE PARAMETERS SECTION ---------
+
+// PIN the AM2302 (DHT22) is wired to
+#define PIN_DHT  5
 
 // Waveshare Sim7000E NB-IoT HAT
 #define PIN_DTR  4
 
-// AM2302 (DHT22)
-#define PIN_DHT  5
+// --------- END OF CONFIGURABLE FIRMWARE PARAMETERS SECTION ---------
+
+#include "dht.h"
+#include "podenosim.h"
 
 PodEnoSim enosim(&Serial1);
 
