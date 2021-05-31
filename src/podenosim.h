@@ -1,5 +1,5 @@
 /*
-  Safe2.h - Library to access SIM based SAFE2 services.
+  PodEnoSim.h - Library to access SIM based SAFE2 services.
   Created by Kostiantyn Chertov, PodGroup, May 14, 2021.
   Released into the public domain.
 */
@@ -33,9 +33,9 @@
 #define RES_INVALID_GET_DATA_RESPONSE  0x09
 
 
-class Safe2 {
+class PodEnoSim {
   public:
-    Safe2(HardwareSerial * modemSerial);
+    PodEnoSim(HardwareSerial * modemSerial);
     
     // standard API
     byte init(long modemBaudRate);

@@ -51,9 +51,9 @@ const int SleepSecs = 5 * 60;
 #include <ArduinoUniqueID.h>
 #include <ArduinoLowPower.h>
 #include <ArduinoJson.h>
-#include "safe2.h"
+#include "podenosim.h"
 
-Safe2 safe2(&SerialGSM);
+PodEnoSim enosim(&SerialGSM);
 
 #define STATE_READY  0x00
 #define STATE_REQUEST_SENT  0x01
@@ -145,7 +145,7 @@ void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
   
   Serial.print("Modem initialization...");
-  res = safe2.init(MODEM_BAUD_RATE);
+  res = enosim.init(MODEM_BAUD_RATE);
   if (res == RES_OK) {
     Serial.println("OK");
   } else {
@@ -160,21 +160,21 @@ void setup() {
   delay(300);
 
   Serial.print("waiting for modem start...");
-  safe2.waitForModemStart();
+  enosim.waitForModemStart();
   Serial.println("OK");
 
   Serial.print("waiting for network registration...");
-  safe2.waitForNetworkRegistration();
+  enosim.waitForNetworkRegistration();
   Serial.println("OK");
   
   // put Device ID
-  res = safe2.deviceIdSet(id, idLen);
+  res = enosim.deviceIdSet(id, idLen);
   if (res == RES_OK) {
     Serial.println("Set Device ID: OK");
   } else {
     Serial.println("Set Device ID: ERROR");
   }
-  safe2.prepareForSleep();
+  enosim.prepareForSleep();
   
   gState = STATE_READY;
 }
@@ -189,7 +189,7 @@ void loop() {
 
   if (gState == STATE_READY) {
     Serial.println("config request");
-    res = safe2.configRequest();
+    res = enosim.configRequest();
     if (res == RES_OK) {
       Serial.println("request - OK");
       gState = STATE_REQUEST_SENT;
@@ -202,7 +202,7 @@ void loop() {
     for (secs=0; secs < 10; secs++) {
       delay(1000);
     }
-    res = safe2.state(receiveState, receiveRes);
+    res = enosim.state(receiveState, receiveRes);
     Serial.print("receiving state: ");
     Serial.println(receiveState, HEX);
     if (receiveState == STATUS_RECEIVE_DATA) {
@@ -223,14 +223,14 @@ void loop() {
   }
   if (gState == STATE_REQUEST_DATA) {
     dataLen = LEN_CONFIG;
-    res = safe2.configGet(gConfig, dataLen);
+    res = enosim.configGet(gConfig, dataLen);
     if (res == RES_OK) {
       res = configParseApply((char *)gConfig, dataLen);
     }
     gState = STATE_DONE;
   }
   if (gState == STATE_DONE) {
-    safe2.prepareForSleep();
+    enosim.prepareForSleep();
     gState = STATE_READY;
   
     Serial.print("waiting");

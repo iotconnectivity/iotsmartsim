@@ -9,7 +9,7 @@
   along with this program.  If not, see <https://opensource.org/licenses/MIT>.
 
   Description:
-    - Post DHT-22 Temperature to Pod IoT Platform API (See below).
+    - Post DHT22 Temperature to Pod IoT Platform API (See below).
     - Uses Pod ENO SIM built-in TLS1.3-PSK to request HTTPS POST /v1/data/{DEVICEID}
 
   More information:
@@ -23,6 +23,7 @@
 
   Requirements:
     - Arduino MKR 1400 GSM board.
+    - AM2302 DHT22 Temperature Sensor.
     - Pod ENO SIM Card (ask for yours, emails below).
     - Configuration for the SIM Card with the following format (at Pod IoT Platform):
 
@@ -31,16 +32,20 @@
    - J. Félix Ontañón <felix.ontanon@podgroup.com>
 */
 
+// --------- BEGINING OF CONFIGURABLE FIRMWARE PARAMETERS SECTION ---------
+
+// PIN the AM2302 (DHT22) is wired to
+#define PIN_DHT  4
+
+// --------- END OF CONFIGURABLE FIRMWARE PARAMETERS SECTION ---------
+
 #include <MKRGSM.h>
 #include <ArduinoUniqueID.h>
 #include "dht.h"
 
-#include "safe2.h"
+#include "podenosim.h"
 
-// AM2302 (DHT22)
-#define PIN_DHT  4
-
-Safe2 safe2(&SerialGSM);
+PodEnoSim enosim(&SerialGSM);
 
 dht sensor;
 
@@ -105,7 +110,7 @@ void setup() {
   pinMode(PIN_DHT, INPUT);
 
   Serial.print("Modem initialization...");
-  res = safe2.init(MODEM_BAUD_RATE);
+  res = enosim.init(MODEM_BAUD_RATE);
   if (res == RES_OK) {
     Serial.println("OK");
   } else {
@@ -120,21 +125,21 @@ void setup() {
   delay(300);
 
   Serial.print("waiting for modem start...");
-  safe2.waitForModemStart();
+  enosim.waitForModemStart();
   Serial.println("OK");
 
   Serial.print("waiting for network registration...");
-  safe2.waitForNetworkRegistration();
+  enosim.waitForNetworkRegistration();
   Serial.println("OK");
   
   // put Device ID
-  res = safe2.deviceIdSet(id, idLen);
+  res = enosim.deviceIdSet(id, idLen);
   if (res == RES_OK) {
     Serial.println("Set Device ID: OK");
   } else {
     Serial.println("Set Device ID: ERROR");
   }
-  safe2.prepareForSleep();
+  enosim.prepareForSleep();
 }
 
 void loop() {
@@ -159,7 +164,7 @@ void loop() {
   dataBuf[OFS_DATA_DIGITS + 4] = digits[3];
 
   Serial.print("Put Data: ");
-  byte res = safe2.dataSend(dataBuf, LEN_DATA);
+  byte res = enosim.dataSend(dataBuf, LEN_DATA);
   if (res == RES_OK) {
     Serial.println("OK");
   } else {

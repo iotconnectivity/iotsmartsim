@@ -1,5 +1,5 @@
 #include "dht.h"
-#include "safe2.h"
+#include "podenosim.h"
 
 // Waveshare Sim7000E NB-IoT HAT
 #define PIN_DTR  4
@@ -7,7 +7,7 @@
 // AM2302 (DHT22)
 #define PIN_DHT  5
 
-Safe2 safe2(&Serial1);
+PodEnoSim enosim(&Serial1);
 
 dht sensor;
 
@@ -66,7 +66,7 @@ void setup() {
   pinMode(PIN_DHT, INPUT);
   
   Serial.print("Modem initialization...");
-  res = safe2.init(MODEM_BAUD_RATE);
+  res = enosim.init(MODEM_BAUD_RATE);
   if (res == RES_OK) {
     Serial.println("OK");
   } else {
@@ -79,21 +79,21 @@ void setup() {
   delay(1000);
 
   Serial.print("waiting for modem start...");
-  safe2.waitForModemStart();
+  enosim.waitForModemStart();
   Serial.println("OK");
 
   Serial.print("waiting for network registration...");
-  safe2.waitForNetworkRegistration();
+  enosim.waitForNetworkRegistration();
   Serial.println("OK");
   
   // put Device ID
-  res = safe2.deviceIdSet(id, LEN_DEVICE_ID);
+  res = enosim.deviceIdSet(id, LEN_DEVICE_ID);
   if (res == RES_OK) {
     Serial.println("Set Device ID: OK");
   } else {
     Serial.println("Set Device ID: ERROR");
   }
-  safe2.prepareForSleep();
+  enosim.prepareForSleep();
 }
 
 void loop() {
@@ -118,7 +118,7 @@ void loop() {
   dataBuf[OFS_DATA_DIGITS + 4] = digits[3];
 
   Serial.print("Put Data: ");
-  byte res = safe2.dataSend(dataBuf, LEN_DATA);
+  byte res = enosim.dataSend(dataBuf, LEN_DATA);
   if (res == RES_OK) {
     Serial.println("OK");
   } else {

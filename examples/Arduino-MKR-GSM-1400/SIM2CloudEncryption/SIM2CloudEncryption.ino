@@ -46,9 +46,9 @@ const char DATA_ITEM[LEN_DATA] = { '{', '"', 't', 'e', 'm', 'p', 'e', 'r', 'a', 
 #include <ArduinoUniqueID.h>
 #include <ArduinoLowPower.h>
 
-#include "safe2.h"
+#include "podenosim.h"
 
-Safe2 safe2(&SerialGSM);
+PodEnoSim enosim(&SerialGSM);
 
 #define MODEM_BAUD_RATE  9600
 #define LOG_BAUD_RATE  115200
@@ -93,7 +93,7 @@ void setup() {
   pinMode(GSM_RESETN, OUTPUT);
 
   Serial.print("Modem initialization...");
-  res = safe2.init(MODEM_BAUD_RATE);
+  res = enosim.init(MODEM_BAUD_RATE);
   if (res == RES_OK) {
     Serial.println("OK");
   } else {
@@ -108,28 +108,28 @@ void setup() {
   delay(300);
 
   Serial.print("waiting for modem start...");
-  safe2.waitForModemStart();
+  enosim.waitForModemStart();
   Serial.println("OK");
 
   Serial.print("waiting for network registration...");
-  safe2.waitForNetworkRegistration();
+  enosim.waitForNetworkRegistration();
   Serial.println("OK");
   
   // put Device ID
-  res = safe2.deviceIdSet(id, idLen);
+  res = enosim.deviceIdSet(id, idLen);
   if (res == RES_OK) {
     Serial.println("Set Device ID: OK");
   } else {
     Serial.println("Set Device ID: ERROR");
   }
-  safe2.prepareForSleep();
+  enosim.prepareForSleep();
 }
 
 void loop() {
   memcpy(dataBuf, DATA_ITEM, LEN_DATA);
 
   Serial.print("Put Data: ");
-  byte res = safe2.dataSend(dataBuf, LEN_DATA);
+  byte res = enosim.dataSend(dataBuf, LEN_DATA);
   if (res == RES_OK) {
     Serial.println("OK");
   } else {

@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include <HardwareSerial.h>
-#include "safe2.h"
+#include "podenosim.h"
 
 // number of loops to wait for the end of initialization 
 #define TECHNOLOGY_INIT_WAITING  7
@@ -60,11 +60,11 @@ const char MODEM_ERROR[LEN_MODEM_ERROR] = {'E', 'R', 'R', 'O', 'R', '\r', '\0'};
 #define EOL  '\n'
 
 
-Safe2::Safe2(HardwareSerial * modemSerial) {
+PodEnoSim::PodEnoSim(HardwareSerial * modemSerial) {
   _modem = modemSerial;
 }
 
-byte Safe2::init(long modemBaudRate) {
+byte PodEnoSim::init(long modemBaudRate) {
 
   if (modemBaudRate < 1200) {
     return RES_INVALID_PARAMETERS;
@@ -84,7 +84,7 @@ byte Safe2::init(long modemBaudRate) {
 #define TIME_WAIT_FOR_NEXT_CHAR_MS  10
 #define TIME_WAIT_FOR_SERIAL_AVAILABLE_MS  300
 
-void Safe2::waitForModemStart() {
+void PodEnoSim::waitForModemStart() {
   char b;
   while (true) {
     // put AT command
@@ -108,7 +108,7 @@ void Safe2::waitForModemStart() {
   }
 }
 
-void Safe2::waitForNetworkRegistration() {
+void PodEnoSim::waitForNetworkRegistration() {
   byte cntr = 0;
   bool registeredFlag = false;
   while (cntr < TECHNOLOGY_INIT_WAITING) {
@@ -135,7 +135,7 @@ void Safe2::waitForNetworkRegistration() {
   }
 }
 
-bool Safe2::registered(char * resp) {
+bool PodEnoSim::registered(char * resp) {
   char b = *resp;
   b &= 0x0f;
   resp++;
@@ -154,7 +154,7 @@ bool Safe2::registered(char * resp) {
   }
 }
 
-void Safe2::atCommandSend(short len) {
+void PodEnoSim::atCommandSend(short len) {
   short cmdLen = len;
   short blockLen;
   short ofs = 0;
@@ -176,7 +176,7 @@ void Safe2::atCommandSend(short len) {
 
 #define CNTR_MAX  10000
 
-short Safe2::atCommandResponse() {
+short PodEnoSim::atCommandResponse() {
   // read AT response
   short cntr = 0;
   char * ptr;
@@ -202,7 +202,7 @@ short Safe2::atCommandResponse() {
   return len;
 }
 
-short Safe2::decimalPut(int v, short offset) {
+short PodEnoSim::decimalPut(int v, short offset) {
   short ofs = offset;
   // number of chars populated
   char cnt = 1;
@@ -232,7 +232,7 @@ short Safe2::decimalPut(int v, short offset) {
 #define LEN_HEX  16
 const char HEX_CONVERSION[LEN_HEX] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
 
-short Safe2::bytePutHex(byte b, short offset) {
+short PodEnoSim::bytePutHex(byte b, short offset) {
   _bufferAT[offset++] = HEX_CONVERSION[(b >> 4) & 0x0f];
   _bufferAT[offset++] = HEX_CONVERSION[b & 0x0f];
   return offset;
@@ -240,7 +240,7 @@ short Safe2::bytePutHex(byte b, short offset) {
 
 #define LEN_BYTE_HEX  2
 
-short Safe2::atCsimBuild(byte * apduBuf, byte * dataBuf, short dataLen) {
+short PodEnoSim::atCsimBuild(byte * apduBuf, byte * dataBuf, short dataLen) {
   short len = LEN_APDU_HEADER; 
   short ofs = 0;
   if (dataBuf != NULL) {
@@ -285,7 +285,7 @@ short Safe2::atCsimBuild(byte * apduBuf, byte * dataBuf, short dataLen) {
 #define TAG_DEVICE_ID  0xc0
 #define TAG_DEVICE_DATA 0xc1
 
-byte Safe2::channelOpen() {
+byte PodEnoSim::channelOpen() {
   if (_channelNo != 0) {
     return RES_OK;
   }
@@ -338,7 +338,7 @@ byte Safe2::channelOpen() {
   return RES_OK;
 }
 
-byte Safe2::channelClose() {
+byte PodEnoSim::channelClose() {
   if (_channelNo == 0) {
     return RES_OK;
   }
@@ -353,12 +353,12 @@ byte Safe2::channelClose() {
   return RES_OK;
 }
 
-void Safe2::prepareForSleep() {
+void PodEnoSim::prepareForSleep() {
   // Deselect
   channelClose();
 }
 
-byte Safe2::dataGet(byte mode, short &dataLength) {
+byte PodEnoSim::dataGet(byte mode, short &dataLength) {
   char bh, bl;
   short cmdLen;
   short respLen;
@@ -450,13 +450,13 @@ byte Safe2::dataGet(byte mode, short &dataLength) {
   return RES_OK;
 }
 
-byte Safe2::configRequest() {
+byte PodEnoSim::configRequest() {
 
   short len = 0;
   return dataGet(APDU_GET_DATA_MODE_REQUEST, len);
 }
 
-byte Safe2::configGet(byte * configBuffer, short &configLength) {
+byte PodEnoSim::configGet(byte * configBuffer, short &configLength) {
   short len = 0;
   byte res = dataGet(APDU_GET_DATA_MODE_DATA, len);
   if (res != RES_OK) {
@@ -469,7 +469,7 @@ byte Safe2::configGet(byte * configBuffer, short &configLength) {
   return RES_OK;
 }
 
-char Safe2::hex2val(char h) {
+char PodEnoSim::hex2val(char h) {
   for (char i=0; i<LEN_HEX; i++) {
     if (HEX_CONVERSION[i] == h) {
       return i;
@@ -478,7 +478,7 @@ char Safe2::hex2val(char h) {
   return -1;
 }
 
-short Safe2::chars2short(char * buf) {
+short PodEnoSim::chars2short(char * buf) {
   char b; 
   short w = 0;
   for (char i=0; i<4; i++) {
@@ -492,7 +492,7 @@ short Safe2::chars2short(char * buf) {
   return w;
 }
 
-byte Safe2::state(short &receivingState, short &receivingResult) {
+byte PodEnoSim::state(short &receivingState, short &receivingResult) {
   _apduHeader[OFS_APDU_CLA] = APDU_ISO_CLA;
   _apduHeader[OFS_APDU_INS] = APDU_GET_STATUS_INS;
   _apduHeader[OFS_APDU_P1] = APDU_GET_STATUS_MODE_GET;
@@ -556,7 +556,7 @@ byte Safe2::state(short &receivingState, short &receivingResult) {
 }
 
 
-byte Safe2::dataPut(byte tag, byte * dataPtr, short dataLen) {
+byte PodEnoSim::dataPut(byte tag, byte * dataPtr, short dataLen) {
   short cmdLen;
   short respLen;
   byte res;
@@ -579,11 +579,11 @@ byte Safe2::dataPut(byte tag, byte * dataPtr, short dataLen) {
   return RES_OK;
 }
 
-byte Safe2::dataSend(byte * dataBuffer, short dataLength) {
+byte PodEnoSim::dataSend(byte * dataBuffer, short dataLength) {
   return dataPut(TAG_DEVICE_DATA, dataBuffer, dataLength);
 }
 
-byte Safe2::deviceIdSet(byte * deviceIdBuffer, short deviceIdLength) {
+byte PodEnoSim::deviceIdSet(byte * deviceIdBuffer, short deviceIdLength) {
   return dataPut(TAG_DEVICE_ID, deviceIdBuffer, deviceIdLength);
 }
 
