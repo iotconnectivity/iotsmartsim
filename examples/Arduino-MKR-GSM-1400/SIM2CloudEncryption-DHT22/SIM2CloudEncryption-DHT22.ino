@@ -1,9 +1,46 @@
+/*
+  IoTSoundSensor. Copyright (c) 2021 Pod Group Ltd. http://podgroup.com
+  
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License version 3 as
+  published by the Free Software Foundation
+  
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+  Description:
+    - Post DHT-22 Temperature to Pod IoT Platform API (See below).
+    - Uses Pod ENO SIM built-in TLS1.3-PSK to request HTTPS POST /v1/data/{DEVICEID}
+
+  More information:
+    - Pod IoT Platform: https://iotsim.podgroup.com/v1/docs/#/
+    - Arduino Project Hub Article: https://create.arduino.cc/projecthub/kostiantynchertov/zero-touch-provisioning-based-on-tls-1-3-a07359
+
+  Usage:
+    - Open Board Manager and install "Arduino SAMD Boards (32-bits ARM Cortex-M0+).
+    - Open Library Manager and install: "MKRGSM", "ArduinoUniqueID", "DHT Sensor Library".
+    - Select Board "Arduino MKR 1400 GSM".
+
+  Requirements:
+    - Arduino MKR 1400 GSM board.
+    - Pod ENO SIM Card (ask for yours, emails below).
+    - Configuration for the SIM Card with the following format (at Pod IoT Platform):
+
+  Authors:
+   - Kostiantyn Chertov <kostiantyn.chertov@podgroup.com>
+   - J. Félix Ontañón <felix.ontanon@podgroup.com>
+*/
+
 #include <MKRGSM.h>
 #include <ArduinoUniqueID.h>
-
 #include "dht.h"
-#include "safe2.h"
 
+#include "safe2.h"
 
 // AM2302 (DHT22)
 #define PIN_DHT  4

@@ -1,10 +1,67 @@
+/*
+  IoTSoundSensor. Copyright (c) 2021 Pod Group Ltd. http://podgroup.com
+  
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License version 3 as
+  published by the Free Software Foundation
+  
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+  
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+  Description:
+    - Powers ON/OFF The LED_BUILTIN for Arduino MKR 1400 GSM board.
+    - Uses Pod ENO SIM to retrieve LED configuration from Pod IoT Platform.
+
+  More information:
+    - Pod IoT Platform: https://iotsim.podgroup.com/v1/docs/#/
+    - Arduino Project Hub Article: https://create.arduino.cc/projecthub/kostiantynchertov/zero-touch-provisioning-based-on-tls-1-3-a07359
+
+  Usage:
+    - Open Board Manager and install "Arduino SAMD Boards (32-bits ARM Cortex-M0+).
+    - Open Library Manager and install: "MKRGSM", "ArduinoUniqueID", "ArduinoLowPower", "ArduinoJson"
+    - Select Board "Arduino MKR 1400 GSM".
+    - Optionally configure seconds between retries.
+
+  Requirements:
+    - Arduino MKR 1400 GSM board.
+    - Led 10mm + Resistor 220 Ohm.
+    - Pod ENO SIM Card (ask for yours, emails below).
+    - Configuration for the SIM Card with the following format (at Pod IoT Platform):
+      {
+        "configuration": {
+        "version": "2021-05-31",
+        "config": [{
+          "action": "iot:Alarm",
+          "effect": "On"
+        ]}
+      }    
+
+  Authors:
+   - Kostiantyn Chertov <kostiantyn.chertov@podgroup.com>
+   - J. Félix Ontañón <felix.ontanon@podgroup.com>
+*/
+
+// --------- BEGINING OF CONFIGURABLE FIRMWARE PARAMETERS SECTION ---------
+
+// PIN the LED is wired to
+#define PIN_LED 7
+
+// Seconds to sleep between each run. You can configure this.
+// const int SleepSecs = 5 * 60;
+const int SleepSecs = 1 * 60;
+
+// --------- END OF CONFIGURABLE FIRMWARE PARAMETERS SECTION ---------
+
 #include <MKRGSM.h>
 #include <ArduinoUniqueID.h>
 #include <ArduinoJson.h>
+#include <ArduinoLowPower.h>
 #include "safe2.h"
-
-// LED (Config)
-#define PIN_LED  7
 
 Safe2 safe2(&SerialGSM);
 
@@ -173,15 +230,7 @@ void loop() {
     gState = STATE_READY;
   
     Serial.print("waiting");
-    byte minutes = 5;
-    
-    while (minutes > 0) {
-      for (secs=0; secs < 60; secs++) {
-        delay(1000);
-      }
-      minutes -= 1;
-      Serial.print('.');
-    }
+    LowPower.deepSleep(SleepSecs * 1000);
   }
   Serial.println();
 }
