@@ -34,7 +34,7 @@ Turning Arduino Nano into an IoT board with PodGroup's IoT SIM and **SIM2Cloud E
 
 https://create.arduino.cc/projecthub/kostiantynchertov/tls-1-3-for-arduino-nano-649610
 
-<a href="https://create.arduino.cc/projecthub/kostiantynchertov/tls-1-3-for-arduino-nano-649610"><img width="600" alt="andaluh-discord about" src="https://hackster.imgix.net/uploads/attachments/1196958/_fsJWio6Efg.blob"></a>
+<a href="https://create.arduino.cc/projecthub/kostiantynchertov/tls-1-3-for-arduino-nano-649610"><img width="600" alt="arduino-nano-iot-board" src="https://hackster.imgix.net/uploads/attachments/1196958/_fsJWio6Efg.blob?auto=compress%2Cformat&w=900&h=675&fit=min"></a>
 
 👉 **On Boarding an Arduino MKR GSM 1400**: 
 
@@ -42,7 +42,7 @@ Auto-configuring Arduino GSM boards with PodGroup's IoT SIM and **Zero Touch Pro
 
 https://create.arduino.cc/projecthub/kostiantynchertov/zero-touch-provisioning-based-on-tls-1-3-a07359
 
-<a href="https://create.arduino.cc/projecthub/kostiantynchertov/zero-touch-provisioning-based-on-tls-1-3-a07359"><img width="600" alt="andaluh-discord about" src="https://hackster.imgix.net/uploads/attachments/1294347/_GEOk3hWCaO.blob"></a>
+<a href="https://create.arduino.cc/projecthub/kostiantynchertov/zero-touch-provisioning-based-on-tls-1-3-a07359"><img width="600" alt="arduino-mkr-gsm-140-on-boarding" src="https://hackster.imgix.net/uploads/attachments/1294347/_GEOk3hWCaO.blob?auto=compress%2Cformat&w=900&h=675&fit=min"></a>
 
 ## Installation
 
