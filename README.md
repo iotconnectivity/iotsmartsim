@@ -19,7 +19,7 @@ Do you want a trial? **Contact us to order your SIM trial**: <a href="mailto:inn
 
 ## Description
 
-Use the SIM-embedded applications interacts with the PodGroup's IoT Platform. Pod ENO SIM card includes the following embedded apps:
+Use the SIM-embedded applications interacts with PodGroup's IoT Platform. Pod ENO SIM card includes the following embedded apps:
 
 * **Zero Touch Provisioning**: The SIM will download your device configuration from cloud.
 * **SIM-to-Cloud Encryption**: The SIM will upload your device telemetry to cloud.

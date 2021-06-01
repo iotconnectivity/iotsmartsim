@@ -14,7 +14,7 @@
 
   More information:
     - Pod IoT Platform: https://iotsim.podgroup.com/v1/docs/#/
-    - Arduino Project Hub Article: https://create.arduino.cc/projecthub/kostiantynchertov/zero-touch-provisioning-based-on-tls-1-3-a07359
+    - Arduino Project Hub Article: https://create.arduino.cc/projecthub/kostiantynchertov/tls-1-3-for-arduino-nano-649610
 
   Usage:
     - Open Board Manager and install "Arduino megaAVR Boards".
@@ -37,8 +37,14 @@
 // PIN the AM2302 (DHT22) is wired to
 #define PIN_DHT  5
 
-// Waveshare Sim7000E NB-IoT HAT
+// PIN the Waveshare Sim7000E NB-IoT HAT DTR is wired to
 #define PIN_DTR  4
+
+// Minutes between each request. You can configure this, but please know
+// each request is queued. The SIM + GSM Module will asynchronously run 
+// each HTTPS POST operation from queue. One miniute or more is suggested
+// between each requests.
+const byte WAIT_MINUTES = 5;
 
 // --------- END OF CONFIGURABLE FIRMWARE PARAMETERS SECTION ---------
 
@@ -165,7 +171,7 @@ void loop() {
   }
 
   Serial.print("waiting");
-  byte minutes = 5;
+  byte minutes = WAIT_MINUTES;
   byte secs;
   while (minutes > 0) {
     for (secs=0; secs < 60; secs++) {

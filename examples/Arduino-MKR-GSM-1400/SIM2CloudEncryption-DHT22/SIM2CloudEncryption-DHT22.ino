@@ -14,7 +14,7 @@
 
   More information:
     - Pod IoT Platform: https://iotsim.podgroup.com/v1/docs/#/
-    - Arduino Project Hub Article: https://create.arduino.cc/projecthub/kostiantynchertov/zero-touch-provisioning-based-on-tls-1-3-a07359
+    - Arduino Project Hub Article: https://create.arduino.cc/projecthub/kostiantynchertov/tls-1-3-for-arduino-nano-649610
 
   Usage:
     - Open Board Manager and install "Arduino SAMD Boards (32-bits ARM Cortex-M0+)".
@@ -35,6 +35,12 @@
 
 // PIN the AM2302 (DHT22) is wired to
 #define PIN_DHT  4
+
+// Minutes between each request. You can configure this, but please know
+// each request is queued. The SIM + GSM Module will asynchronously run 
+// each HTTPS POST operation from queue. One miniute or more is suggested
+// between each requests.
+const byte SLEEP_MINUTES = 5;
 
 // --------- END OF CONFIGURABLE FIRMWARE PARAMETERS SECTION ---------
 
@@ -146,6 +152,7 @@ void loop() {
 
   memcpy(dataBuf, DATA_ITEM, LEN_DATA);
 
+  Serial.println();
   // read DHT sensor
   int chk = sensor.read22(PIN_DHT);
   if (chk != DHTLIB_OK) {
@@ -173,5 +180,5 @@ void loop() {
   }
 
   Serial.print("waiting");
-  LowPower.sleep(TIME_5_MINS);
+  LowPower.sleep(SLEEP_MINUTES * 60 * 1000);
 }
