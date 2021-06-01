@@ -1,5 +1,5 @@
 /*
-  Arduino Nano Every + Waveshare Sim7000E NB-IoT Hat + DHT22 SIM2Cloud-Encryption Demo.
+  Arduino Nano Every + Waveshare Sim7000E NB-IoT Hat + External LED. Zero Touch Provisioning Demo.
   Copyright (c) 2021 Pod Group Ltd. http://podgroup.com
   
   This program is free software; you can redistribute it and/or modify
@@ -9,8 +9,8 @@
   along with this program.  If not, see <https://opensource.org/licenses/MIT>.
 
   Description:
-    - Post DHT22 Temperature to Pod IoT Platform API (See below).
-    - Uses Pod ENO SIM built-in TLS1.3-PSK to request HTTPS POST /v1/data/{DEVICEID}
+    - Powers ON/OFF The LED_BUILTIN for Arduino MKR 1400 GSM board.
+    - Uses Pod ENO SIM to retrieve LED configuration from Pod IoT Platform.
 
   More information:
     - Pod IoT Platform: https://iotsim.podgroup.com/v1/docs/#/
@@ -18,13 +18,13 @@
 
   Usage:
     - Open Board Manager and install "Arduino megaAVR Boards".
-    - Open Library Manager and install: "DHT Sensor Library".
+    - Open Library Manager and install: "ArduinoJson"
     - Select Board "Arduino Nano Every".
 
   Requirements:
     - Arduino Nano Every.
     - Waveshare Sim7000E NB-IoT Hat
-    - AM2302 DHT22 Temperature Sensor.
+    - Led 10mm + Resistor 220 Ohm.
     - Pod ENO SIM Card (ask for yours, emails below).
 
   Authors:
@@ -34,11 +34,14 @@
 
 // --------- BEGINING OF CONFIGURABLE FIRMWARE PARAMETERS SECTION ---------
 
-// Waveshare Sim7000E NB-IoT HAT
+// PIN the LED is wired to
+#define PIN_LED 6
+
+// PIN the Waveshare Sim7000E NB-IoT HAT is wired to
 #define PIN_DTR  4
 
-// LED (Config)
-#define PIN_LED  6
+// How many minutes to wait before each config download attempts.
+const byte MINUTES = 5;
 
 // --------- END OF CONFIGURABLE FIRMWARE PARAMETERS SECTION ---------
 
@@ -206,7 +209,7 @@ void loop() {
     gState = STATE_READY;
   
     Serial.print("waiting");
-    byte minutes = 5;
+    byte minutes = MINUTES;
     
     while (minutes > 0) {
       for (secs=0; secs < 60; secs++) {
