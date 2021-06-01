@@ -40,6 +40,7 @@
 
 #include <MKRGSM.h>
 #include <ArduinoUniqueID.h>
+#include <ArduinoLowPower.h>
 #include "dht.h"
 
 #include "podenosim.h"
@@ -172,14 +173,5 @@ void loop() {
   }
 
   Serial.print("waiting");
-  byte minutes = 5;
-  byte secs;
-  while (minutes > 0) {
-    for (secs=0; secs < 60; secs++) {
-      delay(1000);
-    }
-    minutes -= 1;
-    Serial.print('.');
-  }
-  Serial.println();
+  LowPower.sleep(TIME_5_MINS);
 }

@@ -179,6 +179,7 @@ void loop() {
 
 
   if (gState == STATE_READY) {
+    Serial.println();
     Serial.println("config request");
     res = enosim.configRequest();
     if (res == RES_OK) {
@@ -227,5 +228,4 @@ void loop() {
     Serial.print("waiting");
     LowPower.deepSleep(SleepSecs * 1000);
   }
-  Serial.println();
 }

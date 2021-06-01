@@ -92,7 +92,7 @@ char configParseApply(const char * buf, short dataLen) {
     return RES_JSON_DESERIALIZATION_FAILED;
   }
   
-  const char* cfg_version = cfg["configuration"]["version"]; // "2020-10-13"
+  const char* cfg_version = cfg["configuration"]["version"]; // "2021-05-31"
   Serial.print("configuration version: ");
   Serial.println(cfg_version);
   
@@ -188,6 +188,7 @@ void loop() {
 
 
   if (gState == STATE_READY) {
+    Serial.println();
     Serial.println("config request");
     res = enosim.configRequest();
     if (res == RES_OK) {
@@ -236,5 +237,4 @@ void loop() {
     Serial.print("waiting");
     LowPower.deepSleep(SleepSecs * 1000);
   }
-  Serial.println();
 }
