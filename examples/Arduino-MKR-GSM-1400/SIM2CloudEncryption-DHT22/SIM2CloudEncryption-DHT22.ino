@@ -18,7 +18,7 @@
 
   Usage:
     - Open Board Manager and install "Arduino SAMD Boards (32-bits ARM Cortex-M0+)".
-    - Open Library Manager and install: "MKRGSM", "ArduinoUniqueID", "DHT Sensor Library".
+    - Open Library Manager and install: "MKRGSM", "ArduinoUniqueID", "Adafruit DHT Sensor Library >= 1.4.2".
     - Select Board "Arduino MKR 1400 GSM".
 
   Requirements:
@@ -34,7 +34,14 @@
 // --------- BEGINING OF CONFIGURABLE FIRMWARE PARAMETERS SECTION ---------
 
 // PIN the AM2302 (DHT22) is wired to
-#define PIN_DHT  4
+#define DHT_PIN  4
+
+// Adafruit DHT library offers support for several DHT sensors.DHT22 AM2302, DHT22 AM2301 and 
+// We've only tested with DHT22 AM2302 ...
+#define DHT_TYPE DHT22 // DHT 22 AM2302, AM2321
+// ... but you can optionally give it a try to DHT11 and DHT21
+//#define DHT_TYPE DHT11   // DHT 11
+//#define DHT_TYPE DHT21   // DHT 21 (AM2301)
 
 // Minutes between each request. You can configure this, but please know
 // each request is queued. The SIM + GSM Module will asynchronously run 
@@ -47,13 +54,13 @@ const byte SLEEP_MINUTES = 5;
 #include <MKRGSM.h>
 #include <ArduinoUniqueID.h>
 #include <ArduinoLowPower.h>
-#include "dht.h"
+#include "DHT.h" // Adafruit DHT Sensor Library >= 1.4.2
 
 #include "podenosim.h"
 
 PodEnoSim enosim(&SerialGSM);
 
-dht sensor;
+DHT sensor(DHT_PIN, DHT_TYPE);
 
 #define MODEM_BAUD_RATE  9600
 #define LOG_BAUD_RATE  115200
@@ -69,6 +76,7 @@ char digits[4];
 #define LEN_DEVICE_ID_MAX  16
 byte id[LEN_DEVICE_ID_MAX];
 
+// Aux function to get 4 digits temp from sensor read
 void getTemperatureDigits(float t, char * digitBuffer) {
   int it = round(t * 100);
   char b;
@@ -80,6 +88,7 @@ void getTemperatureDigits(float t, char * digitBuffer) {
   }
 }
 
+// Aux function to properly print DEVICEID from ArduinoUniqueID
 void logHex(byte * buf, short len) {
   byte b;
   for (short i=0; i<len; i++) {
@@ -94,7 +103,7 @@ void logHex(byte * buf, short len) {
 
 void setup() {
   byte res;
-  
+
   Serial.begin(LOG_BAUD_RATE); 
   while (!Serial) {
     ; // wait for serial port to connect
@@ -109,12 +118,14 @@ void setup() {
   Serial.print("Device ID: ");
   logHex(id, idLen);
 
-
-
   // configure pins
   pinMode(GSM_RESETN, OUTPUT);
-  pinMode(PIN_DHT, INPUT);
+  pinMode(DHT_PIN, INPUT);
 
+  // Initialize DHT sensor
+  sensor.begin();
+
+  // Initialize the ublox module
   Serial.print("Modem initialization...");
   res = enosim.init(MODEM_BAUD_RATE);
   if (res == RES_OK) {
@@ -123,8 +134,6 @@ void setup() {
     Serial.print("ERROR: ");
     Serial.println(res);
   }
-
-  // reset the ublox module
   digitalWrite(GSM_RESETN, HIGH);
   delay(100);
   digitalWrite(GSM_RESETN, LOW);
@@ -138,7 +147,8 @@ void setup() {
   enosim.waitForNetworkRegistration();
   Serial.println("OK");
   
-  // put Device ID
+  // This command sets the DEVICEID to form the 
+  // HTTPS POST /data/{DEVICEID} API request.
   res = enosim.deviceIdSet(id, idLen);
   if (res == RES_OK) {
     Serial.println("Set Device ID: OK");
@@ -153,15 +163,14 @@ void loop() {
   memcpy(dataBuf, DATA_ITEM, LEN_DATA);
 
   Serial.println();
-  // read DHT sensor
-  int chk = sensor.read22(PIN_DHT);
-  if (chk != DHTLIB_OK) {
-    Serial.println("DHT checksum error");
-    delay(10000);
-    return;
-  }
+
+  float t = sensor.readTemperature();
+  Serial.print(F("Temperature: "));
+  Serial.print(t);
+  Serial.println(F("°C "));
+
   // convert temperature value into digits
-  getTemperatureDigits(sensor.temperature, digits);
+  getTemperatureDigits(t, digits);
 
   // put temperature digits in message buffer
   // assume 10 <= temperature < 99
@@ -171,7 +180,14 @@ void loop() {
   dataBuf[OFS_DATA_DIGITS + 4] = digits[3];
 
   Serial.print("Put Data: ");
+
+  // This command to deliver the data to cloud.
+  // Uses SIM-embedded TLS1.3. The SIM ensembles
+  // an HTTPS POST /data/{DEVICEID} request against
+  // Pod IoT Platform API https://iotsim.podgroup.com/v1/docs/#
+  // to be executed by GSM Module.
   byte res = enosim.dataSend(dataBuf, LEN_DATA);
+
   if (res == RES_OK) {
     Serial.println("OK");
   } else {
@@ -179,6 +195,6 @@ void loop() {
     Serial.println(res);
   }
 
-  Serial.print("waiting");
+  Serial.print("sleeping");
   LowPower.sleep(SLEEP_MINUTES * 60 * 1000);
 }
