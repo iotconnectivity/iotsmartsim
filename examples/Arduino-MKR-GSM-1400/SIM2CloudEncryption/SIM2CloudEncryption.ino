@@ -132,9 +132,8 @@ void setup() {
 void loop() {
   memcpy(dataBuf, DATA_ITEM, LEN_DATA);
 
-  Serial.println("Ready to POST: ");
-  Serial.print(DATA_ITEM);
-  Serial.println("Put Data: ");
+  Serial.print("Ready to POST: ");
+  Serial.println(DATA_ITEM);
 
   // This command to deliver the data to cloud.
   // Uses SIM-embedded TLS1.3. The SIM ensembles
@@ -143,6 +142,7 @@ void loop() {
   // to be executed by GSM Module.  
   byte res = enosim.dataSend(dataBuf, LEN_DATA);
  
+  Serial.println("POST Data: ");
   if (res == RES_OK) {
     Serial.println("OK");
   } else {

@@ -163,7 +163,6 @@ void loop() {
   memcpy(dataBuf, DATA_ITEM, LEN_DATA);
 
   Serial.println();
-
   float t = sensor.readTemperature();
   Serial.print(F("Temperature: "));
   Serial.print(t);
@@ -179,7 +178,6 @@ void loop() {
   dataBuf[OFS_DATA_DIGITS + 3] = digits[2];
   dataBuf[OFS_DATA_DIGITS + 4] = digits[3];
 
-  Serial.print("Put Data: ");
 
   // This command to deliver the data to cloud.
   // Uses SIM-embedded TLS1.3. The SIM ensembles
@@ -188,6 +186,7 @@ void loop() {
   // to be executed by GSM Module.
   byte res = enosim.dataSend(dataBuf, LEN_DATA);
 
+  Serial.print("Put Data: ");
   if (res == RES_OK) {
     Serial.println("OK");
   } else {
@@ -195,6 +194,6 @@ void loop() {
     Serial.println(res);
   }
 
-  Serial.print("sleeping");
+  Serial.println("sleeping");
   LowPower.sleep(SLEEP_MINUTES * 60 * 1000);
 }
