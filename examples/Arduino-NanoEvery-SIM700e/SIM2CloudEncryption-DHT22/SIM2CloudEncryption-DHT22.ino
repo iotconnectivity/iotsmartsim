@@ -56,7 +56,7 @@ const byte WAIT_MINUTES = 5;
 // --------- END OF CONFIGURABLE FIRMWARE PARAMETERS SECTION ---------
 
 #include "DHT.h" // Adafruit DHT Sensor Library >= 1.4.2
-#include "podenosim.h"
+#include "PodEnoSim.h"
 
 PodEnoSim enosim(&Serial1);
 

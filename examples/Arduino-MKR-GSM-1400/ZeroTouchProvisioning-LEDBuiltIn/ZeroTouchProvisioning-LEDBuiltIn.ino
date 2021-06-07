@@ -51,7 +51,7 @@ const int SleepSecs = 5 * 60;
 #include <ArduinoUniqueID.h>
 #include <ArduinoLowPower.h>
 #include <ArduinoJson.h>
-#include "podenosim.h"
+#include "PodEnoSim.h"
 
 PodEnoSim enosim(&SerialGSM);
 

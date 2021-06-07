@@ -46,7 +46,7 @@ const byte WAIT_MINUTES = 5;
 // --------- END OF CONFIGURABLE FIRMWARE PARAMETERS SECTION ---------
 
 #include <ArduinoJson.h>
-#include "podenosim.h"
+#include "PodEnoSim.h"
 
 PodEnoSim enosim(&Serial1);
 

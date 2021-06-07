@@ -51,7 +51,7 @@ const byte SLEEP_MINUTES = 5;
 #include <ArduinoUniqueID.h>
 #include <ArduinoLowPower.h>
 
-#include "podenosim.h"
+#include "PodEnoSim.h"
 
 PodEnoSim enosim(&SerialGSM);
 

@@ -56,7 +56,7 @@ const byte SLEEP_MINUTES = 5;
 #include <ArduinoLowPower.h>
 #include "DHT.h" // Adafruit DHT Sensor Library >= 1.4.2
 
-#include "podenosim.h"
+#include "PodEnoSim.h"
 
 PodEnoSim enosim(&SerialGSM);
 
