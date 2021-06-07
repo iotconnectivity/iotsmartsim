@@ -3,8 +3,8 @@
   Created by Kostiantyn Chertov, PodGroup, May 14, 2021.
   Released into the public domain.
 */
-#ifndef SAFE2_H
-#define SAFE2_H
+#ifndef POD_ENO_SIM_H
+#define POD_ENO_SIM_H
 
 #include "Arduino.h"
 #include "HardwareSerial.h"

@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include <HardwareSerial.h>
-#include "podenosim.h"
+#include "PodEnoSim.h"
 
 // number of loops to wait for the end of initialization 
 #define TECHNOLOGY_INIT_WAITING  7
