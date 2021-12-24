@@ -39,6 +39,7 @@ const char APDU_SELECT[LEN_APDU_HEADER] = { 0x00, (char)0xA4, 0x04, 0x0C, 0x00 }
 #define APDU_GET_DATA_MODE_DATA  0x01
 
 #define APDU_GET_STATUS_INS  0xcc
+#define APDU_GET_STATUS_MODE_POST  0x01
 #define APDU_GET_STATUS_MODE_GET  0x02
 #define APDU_GET_STATUS_LEN_GET  0x04
 
@@ -154,10 +155,21 @@ bool PodEnoSim::registered(char * resp) {
   }
 }
 
+void logAT(byte * buf, short len) {
+  byte b;
+  for (short i=0; i<len; i++) {
+    Serial.print((char)buf[i]);
+  }
+  Serial.println();
+}
+
+
 void PodEnoSim::atCommandSend(short len) {
   short cmdLen = len;
   short blockLen;
   short ofs = 0;
+  //logAT(_bufferAT, len);
+
   while (cmdLen > 0) {
     blockLen = _modem->availableForWrite();
     if (blockLen < 1) {
@@ -199,6 +211,7 @@ short PodEnoSim::atCommandResponse() {
     }
     
   } while (ptr == NULL);
+  //logAT(_bufferAT, len);
   return len;
 }
 
@@ -359,6 +372,7 @@ void PodEnoSim::prepareForSleep() {
 }
 
 byte PodEnoSim::dataGet(byte mode, short &dataLength) {
+  char * ptr;
   char bh, bl;
   short cmdLen;
   short respLen;
@@ -381,7 +395,6 @@ byte PodEnoSim::dataGet(byte mode, short &dataLength) {
 
   if (mode == APDU_GET_DATA_MODE_DATA) {
     // analyze response
-    char * ptr;
     ptr = strstr((char *)_bufferAT, MODEM_CSIM);
     if (ptr == NULL) {
       return RES_INVALID_CSIM_RESPONSE;
@@ -432,7 +445,6 @@ byte PodEnoSim::dataGet(byte mode, short &dataLength) {
     if (hlen <= 0) {
       return RES_INVALID_GET_DATA_RESPONSE;
     }
-    hlen -= 2; // exclude SW
     for (short ii=0; ii<hlen; ii++) {
       bh = hex2val(ptr[ofs]);
       bl = hex2val(ptr[ofs + 1]);
@@ -456,16 +468,30 @@ byte PodEnoSim::configRequest() {
   return dataGet(APDU_GET_DATA_MODE_REQUEST, len);
 }
 
+#define SW1_OK  0x90
+
 byte PodEnoSim::configGet(byte * configBuffer, short &configLength) {
   short len = 0;
-  byte res = dataGet(APDU_GET_DATA_MODE_DATA, len);
-  if (res != RES_OK) {
-    return res;
-  }
-  if (len <= 0) {
-    return RES_INVALID_GET_DATA_RESPONSE;
-  }
-  memcpy(configBuffer, _bufferAT, len);
+  short ofs = 0;
+  short total = 0;
+  byte res;
+  byte sw1;
+  do {
+    res = dataGet(APDU_GET_DATA_MODE_DATA, len);
+    if (res != RES_OK) {
+      return res;
+    }
+    if (len <= 0) {
+      return RES_INVALID_GET_DATA_RESPONSE;
+    }
+    // exclude SW
+    len -= 2;
+    sw1 = _bufferAT[len];
+    memcpy(&configBuffer[ofs], _bufferAT, len);
+    ofs += len;
+    total += len;
+  } while (sw1 == SW1_OK);
+  configLength = total;
   return RES_OK;
 }
 
@@ -492,10 +518,10 @@ short PodEnoSim::chars2short(char * buf) {
   return w;
 }
 
-byte PodEnoSim::state(short &receivingState, short &receivingResult) {
+byte PodEnoSim::stateResult(byte mode, short &state, short &result) {
   _apduHeader[OFS_APDU_CLA] = APDU_ISO_CLA;
   _apduHeader[OFS_APDU_INS] = APDU_GET_STATUS_INS;
-  _apduHeader[OFS_APDU_P1] = APDU_GET_STATUS_MODE_GET;
+  _apduHeader[OFS_APDU_P1] = mode;
   _apduHeader[OFS_APDU_P2] = 0x00;
   _apduHeader[OFS_APDU_LEN] = 0x00;
   short cmdLen = atCsimBuild(_apduHeader, NULL, 0);
@@ -550,9 +576,17 @@ byte PodEnoSim::state(short &receivingState, short &receivingResult) {
   if (wResult < 0) {
     return RES_INVALID_GET_STATUS_RESPONSE;
   }
-  receivingState = wState;
-  receivingResult = wResult;
+  state = wState;
+  result = wResult;
   return RES_OK;
+}
+
+byte PodEnoSim::state(short &state, short &result) {
+  return stateResult(APDU_GET_STATUS_MODE_GET, state, result);
+}
+
+byte PodEnoSim::statePost(short &state, short &result) {
+  return stateResult(APDU_GET_STATUS_MODE_POST, state, result);
 }
 
 

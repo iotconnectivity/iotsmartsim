@@ -43,7 +43,8 @@ class PodEnoSim {
     void waitForModemStart();
     void waitForNetworkRegistration();
 
-    byte state(short &receivingState, short &receivingResult);
+    byte state(short &state, short &result);
+    byte statePost(short &state, short &result);
     
     byte deviceIdSet(byte * deviceIdBuffer, short deviceIdLength);
     byte dataSend(byte * dataBuffer, short dataLength);
@@ -76,6 +77,8 @@ class PodEnoSim {
     byte channelClose();
     byte dataGet(byte mode, short &dataLen);
     byte dataPut(byte tag, byte * dataBuffer, short dataLen);
+    
+    byte stateResult(byte mode, short &state, short &result);
 };
 
 #endif
