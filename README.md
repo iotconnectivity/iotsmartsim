@@ -1,13 +1,13 @@
-# Pod ENO SIM for Arduino
+# IoT Sm@rtSIM for Arduino
 
-An Arduino library to interface with **Pod ENO SIM** Applications. Use Pod ENO SIM to delegate the SIM card some IoT Device functions:
+An Arduino library to interface with **IoT Sm@rtSIM** Applications. Use IoT Sm@rtSIM to delegate the SIM card some IoT Device functions:
 
 * **Reduce IoT device Manufacturing costs**: The SIM will encrypt your device telemetry data. You can opt for cheaper hardware now.
 * **Reduce IoT device On Boarding costs**: The SIM will download device settings from the cloud, the first time device is switch on.
 
-This Arduino Library contains real case examples using `Arduino MKR GSM 1400` and `Arduino Nano Every`, in order to let you learn how to use Pod ENO SIM embedded capabilities.
+This Arduino Library contains real case examples using `Arduino MKR GSM 1400` and `Arduino Nano Every`, in order to let you learn how to use IoT Sm@rtSIM embedded capabilities.
 
-Do you want a trial? **Contact us to order your SIM trial**: <a href="mailto:innovations@podgroup.com?subject=Order Pod ENO SIM trial kit">innovations@podgroup.com</a>
+Do you want a trial? **Contact us to order your SIM trial**: <a href="mailto:innovations@podgroup.com?subject=Order IoT Sm@rtSIM trial kit">innovations@podgroup.com</a>
 
 ## Table of Contents
 
@@ -19,18 +19,18 @@ Do you want a trial? **Contact us to order your SIM trial**: <a href="mailto:inn
 
 ## Description
 
-Use the SIM-embedded applications interacts with PodGroup's IoT Platform. Pod ENO SIM card includes the following embedded apps:
+Use the SIM-embedded applications interacts with IoT Platform. IoT Sm@rtSIM card includes the following embedded apps:
 
 * **Zero Touch Provisioning**: The SIM will download your device configuration from cloud.
 * **SIM-to-Cloud Encryption**: The SIM will upload your device telemetry to cloud.
 
-The SIM-embedded apps uses TLSv1.3 (PresharedKey) for a secure interaction with PodGroup's IoT Platform.
+The SIM-embedded apps uses TLSv1.3 (PresharedKey) for a secure interaction with IoT Platform.
 
 Do you want to see real case scenarios? Check here 👇
 
 👉 **Arduino Nano IoT Board**:
 
-Turning Arduino Nano into an IoT board with PodGroup's IoT SIM and **SIM2Cloud Encryption** application
+Turning Arduino Nano into an IoT board with IoT SIM and **SIM2Cloud Encryption** application
 
 https://create.arduino.cc/projecthub/kostiantynchertov/tls-1-3-for-arduino-nano-649610
 
@@ -38,7 +38,7 @@ https://create.arduino.cc/projecthub/kostiantynchertov/tls-1-3-for-arduino-nano-
 
 👉 **On Boarding an Arduino MKR GSM 1400**: 
 
-Auto-configuring Arduino GSM boards with PodGroup's IoT SIM and **Zero Touch Provisioning**
+Auto-configuring Arduino GSM boards with IoT SIM and **Zero Touch Provisioning**
 
 https://create.arduino.cc/projecthub/kostiantynchertov/zero-touch-provisioning-based-on-tls-1-3-a07359
 
@@ -50,7 +50,7 @@ Download a .ZIP package from GitHub and Import via `Sketch -> Include Library ->
 
 ## Usage
 
-Once installed, go `File -> Examples -> PodEnoSim` to test the built-in examples. 
+Once installed, go `File -> Examples` to test the built-in examples. 
 
 This Arduino Library contains Examples for `Arduino MKR GSM 1400` and `Arduino Nano Every`
 
