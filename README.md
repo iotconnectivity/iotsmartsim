@@ -7,8 +7,6 @@ An Arduino library to interface with **IoT Sm@rtSIM** Applications. Use IoT Sm@r
 
 This Arduino Library contains real case examples using `Arduino MKR GSM 1400` and `Arduino Nano Every`, in order to let you learn how to use IoT Sm@rtSIM embedded capabilities.
 
-Do you want a trial? **Contact us to order your SIM trial**: <a href="mailto:innovations@podgroup.com?subject=Order IoT Sm@rtSIM trial kit">innovations@podgroup.com</a>
-
 ## Table of Contents
 
 - [Description](#description)
@@ -32,17 +30,9 @@ Do you want to see real case scenarios? Check here 👇
 
 Turning Arduino Nano into an IoT board with IoT SIM and **SIM2Cloud Encryption** application
 
-https://create.arduino.cc/projecthub/kostiantynchertov/tls-1-3-for-arduino-nano-649610
-
-<a href="https://create.arduino.cc/projecthub/kostiantynchertov/tls-1-3-for-arduino-nano-649610"><img width="600" alt="arduino-nano-iot-board" src="https://hackster.imgix.net/uploads/attachments/1196958/_fsJWio6Efg.blob?auto=compress%2Cformat&w=900&h=675&fit=min"></a>
-
 👉 **On Boarding an Arduino MKR GSM 1400**: 
 
 Auto-configuring Arduino GSM boards with IoT SIM and **Zero Touch Provisioning**
-
-https://create.arduino.cc/projecthub/kostiantynchertov/zero-touch-provisioning-based-on-tls-1-3-a07359
-
-<a href="https://create.arduino.cc/projecthub/kostiantynchertov/zero-touch-provisioning-based-on-tls-1-3-a07359"><img width="600" alt="arduino-mkr-gsm-140-on-boarding" src="https://hackster.imgix.net/uploads/attachments/1294347/_GEOk3hWCaO.blob?auto=compress%2Cformat&w=900&h=675&fit=min"></a>
 
 ## Installation
 
